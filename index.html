@@ -155,7 +155,7 @@ p{margin:0}
   </div>
 
   <section style="display:flex;flex-direction:column;gap:8px">
-    <span class="eyebrow">Suggested week (any 3 days with a rest day between)</span>
+    <span class="eyebrow">Your week: Tue, Thu, Sat</span>
     <div class="week" id="week"></div>
   </section>
 
@@ -246,7 +246,7 @@ const DAYS = {
   ],
   cardio:{t:"Steady cardio, 15 min",d:"Stepper, incline treadmill walk, or an easy run for anyone who already runs. Htet: bike, rower or stepper are easier on knees than running if he's new to it."}}
 };
-const WEEK=[["Mon","A"],["Tue",""],["Wed","B"],["Thu",""],["Fri","C"],["Sat",""],["Sun",""]];
+const WEEK=[["Mon",""],["Tue","A"],["Wed",""],["Thu","B"],["Fri",""],["Sat","C"],["Sun",""]];
 const EXBYID={}; Object.entries(DAYS).forEach(([d,D])=>D.ex.forEach(e=>EXBYID[e.id]={...e,day:d}));
 
 const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},
