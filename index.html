@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Three-Day Family Lift</title>
+<meta name="theme-color" content="#EDF0F3" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0F151B" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Family Lift">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23C8402A'/%3E%3Crect x='10' y='22' width='8' height='20' rx='2' fill='white'/%3E%3Crect x='46' y='22' width='8' height='20' rx='2' fill='white'/%3E%3Crect x='18' y='29' width='28' height='6' fill='white'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: one phone-first column, sticky control bar (lifter + day), exercise rows like a gym card, logbook under each lift */
+:root{
+  --bg:#EDF0F3; --surface:#FFFFFF; --ink:#16202A; --muted:#5A6977; --line:#D5DBE1;
+  --accent:#C8402A; --accent-ink:#FFFFFF; --good:#1F7A45; --good-bg:#DDF0E4;
+  --p-wife:#2A64CC; --p-me:#A87A0C; --p-bro:#23844C;
+  --chip:#E3E8ED;
+  --display:"Barlow Condensed","Arial Narrow",Impact,sans-serif;
+  --body:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0F151B; --surface:#18212A; --ink:#E5EAEF; --muted:#93A2B0; --line:#2A3641;
+  --accent:#EE6A50; --accent-ink:#1A0D09; --good:#6FD39A; --good-bg:#173226;
+  --p-wife:#79A6F4; --p-me:#E2B94A; --p-bro:#5FC98C; --chip:#22303B; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0F151B; --surface:#18212A; --ink:#E5EAEF; --muted:#93A2B0; --line:#2A3641;
+  --accent:#EE6A50; --accent-ink:#1A0D09; --good:#6FD39A; --good-bg:#173226;
+  --p-wife:#79A6F4; --p-me:#E2B94A; --p-bro:#5FC98C; --chip:#22303B; color-scheme:dark}
+
+*{box-sizing:border-box}
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+[hidden]{display:none!important}
+img{max-width:100%}
+.pinform{flex-basis:100%;display:flex;flex-wrap:wrap;align-items:end;gap:8px}
+.pinform label{display:flex;flex-direction:column;gap:2px;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);flex:1 1 140px}
+.pinform input{font:500 1rem var(--body);color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;width:100%}
+.pinform input:focus{outline:none;border-color:var(--pc)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:760px;margin:0 auto;padding-block:20px 48px;display:flex;flex-direction:column;gap:22px}
+h1,h2,h3{font-family:var(--display);letter-spacing:.01em;text-wrap:balance;margin:0;line-height:1.05}
+h1{font-size:2.6rem;font-weight:800;text-transform:uppercase}
+h2{font-size:1.55rem;font-weight:700;text-transform:uppercase}
+h3{font-size:1.25rem;font-weight:700}
+p{margin:0}
+.lede{color:var(--muted);max-width:62ch}
+.eyebrow{font-size:.72rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+
+/* sticky controls */
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:10px;
+  display:flex;flex-direction:column;gap:8px;border-bottom:1px solid var(--line)}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.seg button{font:inherit;cursor:pointer;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);
+  border-radius:10px;padding:8px 6px;display:flex;flex-direction:column;align-items:center;gap:0;min-width:0}
+.seg button .big{font-family:var(--display);font-size:1.25rem;font-weight:700;line-height:1.1}
+.seg button .sm{font-size:.72rem;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+.seg button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.seg.people button[aria-pressed="true"]{border-color:var(--pc);box-shadow:inset 0 0 0 1.5px var(--pc)}
+.seg.people button[aria-pressed="true"] .big{color:var(--pc)}
+.seg.days button[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.seg.days button[aria-pressed="true"] .sm{color:var(--bg);opacity:.75}
+
+/* week strip */
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.week div{background:var(--surface);border:1px solid var(--line);border-radius:8px;text-align:center;padding:6px 0;font-size:.75rem;color:var(--muted)}
+.week div b{display:block;font-family:var(--display);font-size:1.1rem;color:var(--ink)}
+.week div.on{border-color:var(--accent)}
+.week div.on b{color:var(--accent)}
+
+/* day */
+.dayhead{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:end;gap:8px}
+.dayhead .meta{color:var(--muted);font-size:.85rem}
+.block{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.block > .lbl{padding:10px 14px;border-bottom:1px solid var(--line);display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:center}
+.ex{padding:14px;display:grid;grid-template-columns:1fr auto;gap:8px 14px;border-bottom:1px solid var(--line)}
+.ex:last-child{border-bottom:0}
+.ex .name{font-weight:600;min-width:0}
+.ex .rx{font-family:var(--display);font-size:1.35rem;font-weight:700;white-space:nowrap;text-align:right;font-variant-numeric:tabular-nums}
+.ex .cue{grid-column:1/-1;color:var(--muted);font-size:.88rem}
+.ex .row{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.load{display:inline-flex;align-items:baseline;gap:6px;border-radius:999px;padding:3px 12px;background:var(--chip);font-variant-numeric:tabular-nums}
+.load b{color:var(--pc);font-weight:600}
+.load span{font-size:.78rem;color:var(--muted)}
+.rest{font-size:.8rem;color:var(--muted)}
+.sets{margin-left:auto;display:flex;gap:6px}
+.sets button{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);background:transparent;color:var(--muted);
+  font:600 .78rem var(--body);cursor:pointer;padding:0}
+.sets button[aria-pressed="true"]{background:var(--pc);border-color:var(--pc);color:var(--surface)}
+.sets button:focus-visible,.logbtn:focus-visible,.btn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.linkbtn{font:inherit;font-size:.82rem;background:none;border:0;color:var(--accent);cursor:pointer;padding:2px 4px}
+.linkbtn:focus-visible{outline:2px solid var(--accent)}
+
+/* logbook */
+.logrow{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+.logbtn{font:600 .82rem var(--body);cursor:pointer;border:1.5px dashed var(--pc);color:var(--pc);background:transparent;border-radius:999px;padding:4px 12px}
+.gain{font-size:.78rem;font-weight:600;color:var(--good);background:var(--good-bg);border-radius:999px;padding:2px 10px;font-variant-numeric:tabular-nums}
+.logform{grid-column:1/-1;display:flex;flex-wrap:wrap;align-items:end;gap:8px;background:var(--chip);border-radius:10px;padding:10px}
+.logform label{display:flex;flex-direction:column;gap:2px;font-size:.72rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);flex:1 1 110px;min-width:0}
+.logform input{font:500 1rem var(--body);color:var(--ink);background:var(--surface);border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;width:100%;font-variant-numeric:tabular-nums}
+.logform input:focus{outline:none;border-color:var(--pc)}
+.btn{font:600 .9rem var(--body);cursor:pointer;border-radius:8px;padding:9px 14px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink)}
+.btn.primary{background:var(--pc);border-color:var(--pc);color:var(--surface)}
+.btn[disabled]{opacity:.6;cursor:default}
+.formmsg{flex-basis:100%;font-size:.82rem;color:var(--accent)}
+.hist{grid-column:1/-1;list-style:none;margin:0;padding:0;display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px}
+.hist li{display:flex;align-items:center;gap:10px;padding:7px 10px;border-bottom:1px solid var(--line);font-size:.88rem;font-variant-numeric:tabular-nums}
+.hist li:last-child{border-bottom:0}
+.hist .dt{color:var(--muted);width:4.5em;flex:none}
+.hist .wt{font-weight:600;flex:1;min-width:0}
+.hist .rp{color:var(--muted)}
+.status{font-size:.8rem;color:var(--muted)}
+
+/* progress */
+.ptable-wrap{overflow-x:auto}
+.ptable{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.ptable th,.ptable td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line);font-size:.9rem;white-space:nowrap}
+.ptable th{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.ptable td:first-child{white-space:normal;min-width:10em}
+.ptable tr:last-child td{border-bottom:0}
+.empty{padding:16px 14px;color:var(--muted);font-size:.9rem}
+
+/* notes */
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.note{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.note ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
+.note .k{font-weight:600}
+.fine{font-size:.82rem;color:var(--muted)}
+@media (prefers-reduced-motion:no-preference){.sets button{transition:background .15s,border-color .15s}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header style="display:flex;flex-direction:column;gap:10px">
+    <span class="eyebrow">3 days a week · full body · about 60 min</span>
+    <h1>Three-Day Family Lift</h1>
+    <p class="lede">One plan for all three of you. Everyone does the same exercises in the same order; only the weights change. Pick your name, then tap <b>+ Log weight</b> after each exercise so next week you know where to start.</p>
+  </header>
+
+  <div class="bar">
+    <div class="seg people" role="group" aria-label="Who is lifting">
+      <button id="p-wife" data-p="wife" style="--pc:var(--p-wife)"><span class="big">110 lb</span><span class="sm">Moe</span></button>
+      <button id="p-me" data-p="me" style="--pc:var(--p-me)"><span class="big">130 lb</span><span class="sm">Pyae</span></button>
+      <button id="p-bro" data-p="bro" style="--pc:var(--p-bro)"><span class="big">210 lb</span><span class="sm">Htet</span></button>
+    </div>
+    <div class="seg days" role="group" aria-label="Workout day">
+      <button id="d-A" data-d="A"><span class="big">Day A</span><span class="sm">Press + Pull</span></button>
+      <button id="d-B" data-d="B"><span class="big">Day B</span><span class="sm">Hinge + Row</span></button>
+      <button id="d-C" data-d="C"><span class="big">Day C</span><span class="sm">Glutes + Arms</span></button>
+    </div>
+  </div>
+
+  <section style="display:flex;flex-direction:column;gap:8px">
+    <span class="eyebrow">Suggested week (any 3 days with a rest day between)</span>
+    <div class="week" id="week"></div>
+  </section>
+
+  <section id="day" style="display:flex;flex-direction:column;gap:12px"></section>
+
+  <section id="progress" style="display:flex;flex-direction:column;gap:12px"></section>
+
+  <section style="display:flex;flex-direction:column;gap:12px">
+    <h2>How it works</h2>
+    <div class="grid2">
+      <div class="note">
+        <h3>Picking the weight</h3>
+        <ul>
+          <li>The "start" loads are <span class="k">first-day guesses</span>. Pin stacks differ a lot between brands, so treat week 1 as calibration.</li>
+          <li>Right weight: the last 2 reps are hard, but your form stays clean and you could do 1–2 more.</li>
+          <li>Once you log a weight, the plan shows your last weight instead of the guess.</li>
+        </ul>
+      </div>
+      <div class="note">
+        <h3>Getting stronger</h3>
+        <ul>
+          <li>Each exercise has a rep target, like 3×10. When you hit it on <span class="k">every set</span>, go up next time: +5 lb on upper body, +10 lb on legs (one pin, or one 5 lb plate per side on the sled).</li>
+          <li><span class="k">Assisted chin/dip is reversed:</span> the pin is help. Lower it by 5–10 lb to progress. The progress table counts a lower assist as a gain.</li>
+          <li>Log reps too when you miss the target (e.g. "10, 9, 8") so you know to repeat the weight.</li>
+        </ul>
+      </div>
+      <div class="note">
+        <h3>Training as a trio</h3>
+        <ul>
+          <li>Share each station and take turns: one lifts while two rest. That gives everyone about 90 seconds of rest without a timer.</li>
+          <li>Go lightest to heaviest (110 → 130 → 210) so you only add weight between turns.</li>
+          <li>One phone can log for everyone: switch the name at the top between turns.</li>
+        </ul>
+      </div>
+      <div class="note">
+        <h3>After 8 weeks</h3>
+        <ul>
+          <li>If form is solid, swap goblet squat for a barbell back squat and DB Romanian deadlift for a barbell version.</li>
+          <li>Or add a 4th day of 30–40 min cardio.</li>
+          <li>Anyone with joint pain, back issues or a heart condition should check with a doctor first, and skip anything that hurts (soreness is fine, sharp pain is not).</li>
+        </ul>
+      </div>
+    </div>
+    <p class="fine">Logged weights are saved to the family Google Sheet, so all three of you see the same numbers on any phone. The set circles are only a checklist on this phone. Sled leg press is logged as plates per side; dumbbells as each hand.</p>
+  </section>
+</div>
+
+<script src="config.js"></script>
+<script>
+const P = {wife:"Moe",me:"Pyae",bro:"Htet"};
+const BW = {wife:110,me:130,bro:210};
+// l = start loads [wife, me, bro]; u = unit logged; assist = lower is better; bw = log reps only
+const DAYS = {
+ A:{title:"Day A: Press + Pull", sub:"Leg press, chest, back, hamstrings, core",
+  warm:"5 min bike, easy pace. Then 10 bodyweight squats and 10 arm circles each way.",
+  ex:[
+   {id:"sled",n:"Plate-loaded leg press (45° sled)",s:3,r:"10",rest:"90 s",u:"lb per side",l:["Empty sled","Sled + 25 lb per side","Sled + 45 lb per side"],c:"Feet shoulder-width, middle of the platform. Lower until knees are about 90°, keep your lower back on the pad, don't lock knees at the top. Log the plates on one side (empty sled = 0)."},
+   {id:"chest",n:"Chest press",s:3,r:"10",rest:"90 s",u:"lb",l:["20–30 lb","40–55 lb","70–90 lb"],c:"Handles at mid-chest height. Shoulder blades pinched back, press without shrugging."},
+   {id:"pulldown",n:"Lat pulldown (bar)",s:3,r:"10",rest:"90 s",u:"lb",l:["40–50 lb","55–70 lb","90–110 lb"],c:"Hands just wider than shoulders. Pull the bar to your upper chest, chest up, no leaning way back."},
+   {id:"legcurl",n:"Prone leg curl",s:3,r:"12",rest:"60 s",u:"lb",l:["20–30 lb","30–40 lb","45–60 lb"],c:"Hips pressed into the pad. Curl up smoothly, lower slowly over 2–3 seconds."},
+   {id:"shoulder",n:"Shoulder press",s:2,r:"10",rest:"60 s",u:"lb",l:["15–25 lb","30–40 lb","45–60 lb"],c:"Back against the pad, ribs down. Stop just short of locking the elbows."},
+   {id:"kneeraise",n:"Captain’s chair knee raise",s:3,r:"10",rest:"60 s",u:"reps",bw:true,l:["Bodyweight","Bodyweight","Bodyweight (3×8 to start)"],c:"Back flat on the pad. Bring knees to chest without swinging, lower under control."}
+  ],
+  cardio:{t:"Bike intervals, 10 min",d:"Alternate 1 min moderate-hard and 1 min easy, 5 rounds."}},
+ B:{title:"Day B: Hinge + Row", sub:"Squat, hip hinge, chin-up, chest, rows, triceps, calves",
+  warm:"5 min rower, easy pace. Then 10 bodyweight good-mornings (hands on hips, push hips back).",
+  ex:[
+   {id:"goblet",n:"Goblet squat (dumbbell or kettlebell)",s:3,r:"10",rest:"90 s",u:"lb",l:["15–20 lb","25–30 lb","40–50 lb"],c:"Hold the weight at your chest. Sit down between your heels, chest up, knees track over toes."},
+   {id:"rdl",n:"Dumbbell Romanian deadlift",s:3,r:"10",rest:"90 s",u:"lb each hand",l:["15 lb each hand","20–25 lb each hand","35–40 lb each hand"],c:"Soft knees, push hips back, slide the dumbbells down the thighs to mid-shin. Flat back the whole time."},
+   {id:"chin",n:"Assisted chin-up",s:3,r:"6–8",rest:"90 s",u:"lb assist",assist:true,l:["70–80 lb assist","60–70 lb assist","110–130 lb assist"],c:"Palms facing you. More assist = easier. Pull until your chin passes the bar, lower all the way."},
+   {id:"pecfly",n:"Pec fly",s:3,r:"12",rest:"60 s",u:"lb",l:["20–30 lb","30–45 lb","50–70 lb"],c:"Slight bend in the elbows, bring handles together in front of your chest, open slowly."},
+   {id:"lowrow",n:"Low row (cable)",s:3,r:"10",rest:"60 s",u:"lb",l:["40–50 lb","50–70 lb","80–100 lb"],c:"Sit tall, pull the handle to your belly button, squeeze shoulder blades together. Don't rock."},
+   {id:"pressdown",n:"Triceps pressdown",s:2,r:"12",rest:"60 s",u:"lb",l:["20–30 lb","30–40 lb","40–55 lb"],c:"Elbows pinned to your sides. Only the forearms move."},
+   {id:"calf",n:"Standing calf raise",s:3,r:"15",rest:"45 s",u:"lb",l:["40–60 lb","60–80 lb","90–120 lb"],c:"Full stretch at the bottom, pause one second at the top."}
+  ],
+  cardio:{t:"Rower, 10 min steady",d:"A pace you can hold while still saying short sentences. Push with legs first, then lean, then pull."}},
+ C:{title:"Day C: Glutes + Arms", sub:"Glutes, quads, dips, rear delts, biceps, hips, core",
+  warm:"5 min stepper, easy pace. Then 10 glute bridges on the floor.",
+  ex:[
+   {id:"glute",n:"Glute trainer",s:3,r:"12",rest:"90 s",u:"lb",l:["40–60 lb","60–80 lb","90–120 lb"],c:"Drive through the heels, squeeze glutes hard at the top for one second. Ribs down, don't arch your lower back."},
+   {id:"matrix",n:"Matrix seated leg press (pin stack)",s:3,r:"12",rest:"90 s",u:"lb",l:["60–80 lb","80–110 lb","140–180 lb"],c:"Same cues as the sled. Higher reps here since Day A went heavier."},
+   {id:"legext",n:"Leg extension",s:2,r:"12",rest:"60 s",u:"lb",l:["20–30 lb","30–45 lb","50–70 lb"],c:"Knee lined up with the machine pivot. Squeeze at the top, lower slowly."},
+   {id:"dip",n:"Assisted dip",s:3,r:"6–8",rest:"90 s",u:"lb assist",assist:true,l:["70–80 lb assist","50–60 lb assist","100–120 lb assist"],c:"Lower until upper arms are about parallel to the floor. Stop higher if shoulders complain."},
+   {id:"reardelt",n:"Rear delt (pec fly machine, facing in)",s:3,r:"12",rest:"60 s",u:"lb",l:["15–20 lb","20–30 lb","35–45 lb"],c:"Arms nearly straight, sweep back until hands are in line with shoulders. Light weight, slow reps."},
+   {id:"curl",n:"Dumbbell biceps curl",s:2,r:"12",rest:"60 s",u:"lb each hand",l:["8–10 lb each hand","12–15 lb each hand","20–25 lb each hand"],c:"Elbows stay at your sides. No swinging."},
+   {id:"abdadd",n:"Hip abductor, then adductor",s:2,r:"15 each",rest:"45 s",u:"lb",l:["50–70 lb","60–80 lb","80–110 lb"],c:"Do 2 sets of out, then 2 sets of in. Controlled, no bouncing at the end."},
+   {id:"legraise",n:"Captain’s chair leg raise",s:3,r:"8",rest:"60 s",u:"reps",bw:true,l:["Bent-knee if needed","Straight legs","Bent-knee to start"],c:"Lift legs to hip height. If you can't get 8 clean reps, do knee raises."}
+  ],
+  cardio:{t:"Steady cardio, 15 min",d:"Stepper, incline treadmill walk, or an easy run for anyone who already runs. Htet: bike, rower or stepper are easier on knees than running if he's new to it."}}
+};
+const WEEK=[["Mon","A"],["Tue",""],["Wed","B"],["Thu",""],["Fri","C"],["Sat",""],["Sun",""]];
+const EXBYID={}; Object.entries(DAYS).forEach(([d,D])=>D.ex.forEach(e=>EXBYID[e.id]={...e,day:d}));
+
+const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+  set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+let person=store.get("fl-person","me"), day=store.get("fl-day","A");
+if(!P[person])person="me"; if(!DAYS[day])day="A";
+let done=store.get("fl-done",{});
+const idx={wife:0,me:1,bro:2};
+const pcVar={wife:"var(--p-wife)",me:"var(--p-me)",bro:"var(--p-bro)"};
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const fmtDate=ts=>new Date(ts).toLocaleDateString(undefined,{month:"short",day:"numeric"});
+const fmtW=(v,e)=>e.bw?`${v} reps`:`${v} ${e.u}`;
+
+/* ---- shared logbook (Google Sheet via Apps Script) ---- */
+const API_URL=((window.FAMILY_LIFT_CONFIG||{}).apiUrl||"").trim();
+let pin=store.get("fl-pin",""), pinErr="";
+let logs=[], dbState="loading"; // noconfig | nopin | loading | ready | stale | error
+let openForm=null, openHist={}, formVals={}, saving=false, formErr="", armDelete=null, pending=false;
+
+async function api(action,extra){
+  const res=await fetch(API_URL,{method:"POST",redirect:"follow",
+    headers:{"Content-Type":"text/plain;charset=utf-8"}, // text/plain avoids a CORS preflight Apps Script can't answer
+    body:JSON.stringify(Object.assign({pin,action},extra||{}))});
+  if(!res.ok)throw Object.assign(new Error("http_"+res.status),{code:"network"});
+  const j=await res.json();
+  if(!j.ok)throw Object.assign(new Error(j.error||"error"),{code:j.error||"error"});
+  return j;
+}
+function forgetPin(msg){pin="";store.set("fl-pin","");pinErr=msg||"";dbState="nopin";openForm=null}
+let loadSeq=0;
+async function loadLogs(){
+  if(!API_URL){dbState="noconfig";safeRender();return}
+  if(!pin){dbState="nopin";safeRender();return}
+  const seq=++loadSeq;
+  if(dbState!=="ready"&&dbState!=="stale"){dbState="loading";safeRender()}
+  try{
+    const j=await api("list");
+    if(seq!==loadSeq)return;
+    logs=(j.logs||[]).filter(l=>typeof l.w==="number"&&P[l.p]&&EXBYID[l.ex]).sort((a,b)=>b.ts-a.ts);
+    dbState="ready";
+  }catch(e){
+    if(seq!==loadSeq)return;
+    if(e.code==="wrong_pin")forgetPin("That PIN didn't work. Try again.");
+    else dbState=logs.length?"stale":"error";
+  }
+  safeRender();
+}
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"&&pin&&API_URL)loadLogs()});
+
+function entriesFor(p,exId){ // newest first
+  return logs.filter(l=>l.p===p&&l.ex===exId);
+}
+function gainText(e,list){
+  if(list.length<2)return "";
+  const first=list[list.length-1].w, last=list[0].w, diff=e.assist?first-last:last-first;
+  if(!(diff>0))return "";
+  if(e.bw)return `+${diff} reps since ${fmtDate(list[list.length-1].ts)}`;
+  return e.assist?`${diff} lb less help since ${fmtDate(list[list.length-1].ts)}`:`+${diff} lb since ${fmtDate(list[list.length-1].ts)}`;
+}
+
+function safeRender(){
+  const a=document.activeElement;
+  if(a&&a.closest&&a.closest("form")){pending=true;return}
+  render();
+}
+document.addEventListener("focusout",()=>setTimeout(()=>{if(pending){const a=document.activeElement;if(!(a&&a.closest&&a.closest("form"))){pending=false;render()}}},0));
+
+function statusLine(){
+  if(dbState==="noconfig")return "Logbook not connected yet: add your Apps Script URL to config.js.";
+  if(dbState==="loading")return "Loading logbook…";
+  if(dbState==="stale")return "Couldn't refresh the logbook. Showing the weights loaded earlier.";
+  if(dbState==="error")return "Couldn't reach the logbook. Check your connection and tap Retry.";
+  return "";
+}
+function statusHtml(){
+  if(dbState==="nopin")return `<form class="pinform" id="pinform">
+      <label for="pin-input">Family PIN (asked once per phone)<input id="pin-input" name="pin" type="password" autocomplete="current-password" required></label>
+      <button class="btn primary" type="submit">Unlock logbook</button>
+      ${pinErr?`<span class="formmsg" role="alert">${esc(pinErr)}</span>`:""}
+    </form>`;
+  const st=statusLine();
+  if(!st)return "";
+  return `<span class="status" style="flex-basis:100%">${esc(st)}${dbState==="error"||dbState==="stale"?` <button class="linkbtn" id="retry">Retry</button>`:""}</span>`;
+}
+
+function render(){
+  pending=false;
+  document.querySelectorAll(".people button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.p===person));
+  document.querySelectorAll(".days button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.d===day));
+  document.getElementById("week").innerHTML=WEEK.map(([d,x])=>`<div class="${x===day?"on":""}">${d}<b>${x||"·"}</b></div>`).join("");
+  const D=DAYS[day], i=idx[person], canLog=dbState==="ready"||dbState==="stale";
+  const rows=D.ex.map(e=>{
+    const list=entriesFor(person,e.id), last=list[0];
+    const sets=Array.from({length:e.s},(_,j)=>{const key=`${person}-${day}-${e.id}-${j}`;
+      return `<button data-k="${key}" aria-pressed="${!!done[key]}" aria-label="${esc(e.n)} set ${j+1}">${j+1}</button>`}).join("");
+    const loadHtml=last?`<span class="load"><b>${esc(fmtW(last.w,e))}</b><span>last · ${fmtDate(last.ts)}</span></span>`
+                      :`<span class="load"><b>${esc(e.l[i])}</b><span>start</span></span>`;
+    const gain=gainText(e,list);
+    const isOpen=openForm===e.id, histOpen=openHist[e.id];
+    const fv=formVals[e.id]||{w:last?String(last.w):"",r:""};
+    const form=isOpen?`<form class="logform" data-form="${e.id}">
+        ${e.bw?"":`<label for="w-${e.id}">${esc(e.u)}<input id="w-${e.id}" name="w" type="number" inputmode="decimal" step="0.5" min="0" value="${esc(fv.w)}" placeholder="e.g. ${last?last.w:"40"}" required></label>`}
+        <label for="r-${e.id}">${e.bw?"Reps (best set)":"Reps done (optional)"}<input id="r-${e.id}" name="r" ${e.bw?'type="number" inputmode="numeric" min="0" required':'type="text"'} value="${esc(fv.r)}" placeholder="${e.bw?e.r:"e.g. 10, 10, 9"}"></label>
+        <button class="btn primary" type="submit" ${saving?"disabled":""}>${saving?"Saving…":"Save"}</button>
+        <button class="btn" type="button" data-cancel="1">Cancel</button>
+        ${formErr?`<span class="formmsg" role="alert">${esc(formErr)}</span>`:""}
+      </form>`:"";
+    const hist=histOpen&&list.length?`<ul class="hist">${list.slice(0,8).map(l=>`<li><span class="dt">${fmtDate(l.ts)}</span><span class="wt">${esc(fmtW(l.w,e))}</span>${l.reps&&!e.bw?`<span class="rp">${esc(l.reps)}</span>`:""}${canLog?`<button class="linkbtn" data-del="${l.id}">${armDelete===l.id?"Tap again to delete":"Delete"}</button>`:""}</li>`).join("")}</ul>`:"";
+    const logrow=(canLog&&!isOpen)||list.length||gain?`<div class="logrow">
+        ${canLog&&!isOpen?`<button class="logbtn" data-log="${e.id}">+ Log ${e.bw?"reps":"weight"}</button>`:""}
+        ${list.length?`<button class="linkbtn" data-hist="${e.id}" aria-expanded="${!!histOpen}">${histOpen?"Hide history":`History (${list.length})`}</button>`:""}
+        ${gain?`<span class="gain">${esc(gain)}</span>`:""}
+      </div>`:"";
+    return `<div class="ex"><div class="name">${esc(e.n)}</div><div class="rx">${e.s} × ${esc(e.r)}</div>
+      <div class="row">${loadHtml}<span class="rest">rest ${e.rest}</span><span class="sets">${sets}</span></div>
+      ${logrow}${form}${hist}
+      <p class="cue">${esc(e.c)}</p></div>`}).join("");
+  document.getElementById("day").innerHTML=`
+    <div class="dayhead"><div style="display:flex;flex-direction:column;gap:4px"><span class="eyebrow">${P[person]} · ${BW[person]} lb</span><h2>${D.title}</h2></div>
+      <span class="meta">${D.sub}</span></div>
+    <div class="block"><div class="lbl"><span class="eyebrow">Warm-up · 8 min</span></div><div class="ex"><p class="cue" style="color:var(--ink)">${D.warm}</p></div></div>
+    <div class="block" style="--pc:${pcVar[person]}"><div class="lbl"><span class="eyebrow">Strength · in this order</span><button class="linkbtn" id="reset">Clear ticks</button>${statusHtml()}</div>${rows}</div>
+    <div class="block"><div class="lbl"><span class="eyebrow">Cardio finisher</span></div><div class="ex"><div class="name">${D.cardio.t}</div><div></div><p class="cue">${D.cardio.d}</p></div></div>`;
+  renderProgress();
+  wire();
+}
+
+function renderProgress(){
+  const rows=[];
+  Object.values(EXBYID).forEach(e=>{
+    const list=entriesFor(person,e.id); if(!list.length)return;
+    const first=list[list.length-1], last=list[0];
+    const diff=e.assist?first.w-last.w:last.w-first.w;
+    const ch=list.length<2?"—":diff>0?`<span class="gain">${e.bw?"+"+diff+" reps":e.assist?diff+" lb less help":"+"+diff+" lb"}</span>`:diff===0?"same":`<span class="status">${e.bw?diff+" reps":e.assist?"+"+(-diff)+" lb help":diff+" lb"}</span>`;
+    rows.push(`<tr><td>${esc(e.n)} <span class="status">· Day ${e.day}</span></td><td>${esc(fmtW(first.w,e))}<br><span class="status">${fmtDate(first.ts)}</span></td><td>${esc(fmtW(last.w,e))}<br><span class="status">${fmtDate(last.ts)}</span></td><td>${ch}</td></tr>`);
+  });
+  document.getElementById("progress").innerHTML=`<h2>Progress · ${P[person]}</h2>
+    <div class="block" style="--pc:${pcVar[person]}">${rows.length?`<div class="ptable-wrap"><table class="ptable"><thead><tr><th>Exercise</th><th>First logged</th><th>Latest</th><th>Change</th></tr></thead><tbody>${rows.join("")}</tbody></table></div>`
+      :`<p class="empty">${dbState==="nopin"?"Enter the family PIN above to see the logbook.":dbState==="noconfig"?"The logbook isn't connected yet.":"Nothing logged yet for "+P[person]+". After each exercise, tap + Log weight and the first and latest weights show up here."}</p>`}</div>`;
+}
+
+function wire(){
+  const pf=document.getElementById("pinform");
+  if(pf)pf.onsubmit=ev=>{ev.preventDefault();pin=pf.pin.value.trim();if(!pin)return;store.set("fl-pin",pin);pinErr="";dbState="loading";render();loadLogs()};
+  const rt=document.getElementById("retry"); if(rt)rt.onclick=()=>loadLogs();
+  document.querySelectorAll(".sets button").forEach(b=>b.onclick=()=>{const k=b.dataset.k;done[k]=!done[k];if(!done[k])delete done[k];store.set("fl-done",done);b.setAttribute("aria-pressed",!!done[k])});
+  document.getElementById("reset").onclick=()=>{Object.keys(done).forEach(k=>{if(k.startsWith(`${person}-${day}-`))delete done[k]});store.set("fl-done",done);render()};
+  document.querySelectorAll("[data-log]").forEach(b=>b.onclick=()=>{openForm=b.dataset.log;formErr="";delete formVals[openForm];render();const f=document.querySelector(`form[data-form="${openForm}"] input`);if(f)f.focus()});
+  document.querySelectorAll("[data-hist]").forEach(b=>b.onclick=()=>{const k=b.dataset.hist;openHist[k]=!openHist[k];armDelete=null;render()});
+  document.querySelectorAll("[data-del]").forEach(b=>b.onclick=async()=>{
+    const id=b.dataset.del;
+    if(armDelete!==id){armDelete=id;render();return}
+    armDelete=null;
+    try{await api("delete",{id});logs=logs.filter(l=>l.id!==id)}
+    catch(e){if(e.code==="wrong_pin")forgetPin("Enter the family PIN again.");else{dbState="stale"}}
+    render();
+  });
+  document.querySelectorAll("form.logform").forEach(f=>{
+    const exId=f.dataset.form;
+    f.oninput=()=>{formVals[exId]={w:f.w?f.w.value:"",r:f.r?f.r.value:""}};
+    f.querySelector("[data-cancel]").onclick=()=>{openForm=null;formErr="";delete formVals[exId];render()};
+    f.onsubmit=async ev=>{
+      ev.preventDefault(); if(saving)return;
+      const e=EXBYID[exId];
+      const w=parseFloat(e.bw?f.r.value:f.w.value);
+      if(!(w>=0)){formErr=e.bw?"Enter how many reps you did.":"Enter the weight you used.";render();return}
+      const doc={p:person,d:e.day,ex:exId,w,ts:Date.now()};
+      if(!e.bw&&f.r.value.trim())doc.reps=f.r.value.trim().slice(0,40);
+      saving=true;formErr="";render();
+      try{
+        const j=await api("add",{entry:Object.assign({},doc,{exName:e.n,unit:e.u})});
+        logs=[j.entry].concat(logs.filter(l=>l.id!==j.entry.id));
+        openForm=null;delete formVals[exId];
+      }catch(err){
+        const c=err&&err.code;
+        if(c==="wrong_pin"){forgetPin("Enter the family PIN again.");formErr=""}
+        else if(c==="bad_weight")formErr="That weight looks wrong. Check the number and try again.";
+        else formErr="Couldn't save. Check your connection and tap Save again.";
+      }
+      saving=false;render();
+    };
+  });
+}
+document.querySelectorAll(".people button").forEach(b=>b.onclick=()=>{person=b.dataset.p;store.set("fl-person",person);openForm=null;formErr="";render()});
+document.querySelectorAll(".days button").forEach(b=>b.onclick=()=>{day=b.dataset.d;store.set("fl-day",day);openForm=null;formErr="";render()});
+render();
+loadLogs();
+</script>
+</body>
+</html>
